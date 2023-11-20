@@ -2,12 +2,12 @@ title: ZJUMoCap Datasets
 description: >- # 这意味着忽略折行
   Preview of ZJUMoCap Datasets
 email: s_q@zju.edu.cn
-baseurl: "/zjumocap" # 如果您的仓库名为 "projectname"
-url: "https://chingswy.github.io" # 不包含尾随斜线
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site
 
 # 构建设置
 markdown: kramdown
-remote_theme: minima
+theme: minima
 
 exclude:
   - Gemfile
