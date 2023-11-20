@@ -1,0 +1,35 @@
+title: ZJUMoCap Datasets
+description: >- # 这意味着忽略折行
+  Preview of ZJUMoCap Datasets
+email: s_q@zju.edu.cn
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site
+
+# 构建设置
+markdown: kramdown
+theme: minima
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+
+# 插件设置
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+collections:
+  zjumocapv1:
+    output: true
+    permalink: /:collection/:path/
+  zjumocapv2:
+    output: true
+    permalink: /:collection/:path/
+  enerf-outdoor:
+    output: true
+    permalink: /:collection/:path/  
