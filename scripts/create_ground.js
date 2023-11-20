@@ -15,7 +15,10 @@ function getChessboard(grid_size=5, divisions = 10, white='#ffffff', black='#444
     }
 
     var texture = new THREE.CanvasTexture(canvas);
-
+    // 假设 texture 已经被加载
+    texture.minFilter = THREE.NearestFilter;
+    texture.magFilter = THREE.NearestFilter;
+    texture.generateMipmaps = false;
     // 创建平面几何体
     var planeGeometry = new THREE.PlaneGeometry(grid_size, grid_size); // 根据需要调整尺寸
 
