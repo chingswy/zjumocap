@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Point Cloud Visualization with Three.js and OrbitControls</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "../static/three/three.module.js",
+                "three/addons/": "../static/three/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+
+        import * as THREE from 'three';
+    
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        // 创建场景
+        var scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff);
+
+        // 创建相机
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        // 创建渲染器
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // 着色器材质
+        var shaderMaterial = new THREE.ShaderMaterial({
+            vertexShader: `
+                attribute float size;
+                attribute vec3 customColor;
+                varying vec3 vColor;
+                uniform float focalLength; // 相机焦距
+                void main() {
+                    vColor = customColor;
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_Position = projectionMatrix * mvPosition;
+                    gl_PointSize = 3. * (focalLength / gl_Position.w) * size;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vColor;
+                void main() {
+                    vec2 cxy = 2.0 * gl_PointCoord - 1.0;
+                    float r = dot(cxy, cxy);
+                    if (r > 1.0) {
+                        discard; // 丢弃圆外的片段
+                    }
+                    // 应用高斯分布公式
+                    float sigma = 0.333; // 控制“钟形”曲线的宽度，可以根据需要调整
+                    float alpha = exp(-(r*r) / (2.0 * sigma * sigma));
+                    gl_FragColor = vec4(vColor, alpha);
+                }
+            `,
+            uniforms: {
+                focalLength: { value: 0 }, // 初始值
+                cameraZ: { value: 0 } 
+            },
+            transparent: true,
+            depthWrite: true
+        });
+
+        // shaderMaterial.blending = THREE.CustomBlending;
+        // shaderMaterial.blendEquation = THREE.AddEquation; // 默认
+        // shaderMaterial.blendSrc = THREE.SrcAlphaFactor; // 源颜色的 alpha 值
+        // shaderMaterial.blendDst = THREE.OneMinusSrcAlphaFactor; // 1.0 减去源颜色的 alpha 值
+
+        // 创建点云几何体
+        var pointGeometry = new THREE.BufferGeometry();
+        var vertices = [];
+        var colors = [];
+        var sizes = [];
+        for ( var i = 0; i < 200; i ++ ) {
+            vertices.push(0, Math.random() * 10, Math.random() * 10);
+            sizes.push(Math.random() * 10 + 1);
+            colors.push(Math.random(), Math.random(), Math.random());
+        }
+        pointGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        pointGeometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+        pointGeometry.setAttribute('customColor', new THREE.Float32BufferAttribute(colors, 3));
+
+        // 创建点云对象
+        var pointCloud = new THREE.Points(pointGeometry, shaderMaterial);
+        scene.add(pointCloud);
+
+        // 添加OrbitControls
+        var controls = new OrbitControls(camera, renderer.domElement);
+
+        // 渲染循环
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update(); // 仅在使用 damping 或自动旋转时才需要
+            shaderMaterial.uniforms.focalLength.value = camera.getFocalLength();
+            sortPointsByDepth(pointGeometry, camera); // 对点云进行排序
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // 对点云进行手动排序的函数
+        function sortPointsByDepth(pointsGeometry, camera) {
+            // 获取位置属性
+            let positions = pointsGeometry.getAttribute('position');
+            let pointCount = positions.count;
+            console.log('sortPointsByDepth 0');
+            let distanceIndexArray = [];
+            // 创建一个新的向量用于投影
+            const projector = new THREE.Vector3();
+
+            // 计算每个点到相机平面的距离并存储索引
+            for (let i = 0; i < pointCount; i++) {
+                projector.fromBufferAttribute(positions, i);
+                projector.project(camera);
+
+                // 这里使用的是投影后的 z 坐标作为距离
+                const distance = projector.z;
+                distanceIndexArray.push([distance, i]);
+            }
+            console.log(pointCount);
+
+            // 按照距离排序
+            distanceIndexArray.sort((a, b) => b[0] - a[0]);
+
+            // 生成新的索引数组
+            const indices = new Uint16Array(pointCount);
+            for (let i = 0; i < pointCount; i++) {
+                indices[i] = distanceIndexArray[i][1];
+            }
+
+            // 更新几何体的索引
+            pointsGeometry.setIndex(new THREE.BufferAttribute(indices, 1));
+            console.log('sortPointsByDepth');
+        }
+
+        // 调整画面大小
+        window.addEventListener('resize', function () {
+            var width = window.innerWidth;
+            var height = window.innerHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        });
+
+    </script>
+</body>
+</html>
