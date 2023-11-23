@@ -67,6 +67,7 @@
                     const skeletonHelper = new THREE.SkeletonHelper(result.mesh);
                     scene.add(skeletonHelper);
                     isInitialized = true;
+                    animate();
                 }
             )
             // scene.add(skeletonHelper);
@@ -142,7 +143,6 @@
             // gui.add(controls, 'rotateBone4', -Math.PI, Math.PI);
         }
         
-        animate();
 
         function animate() {
             requestAnimationFrame(animate);

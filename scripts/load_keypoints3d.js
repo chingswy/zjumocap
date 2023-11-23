@@ -1,24 +1,20 @@
-function loadKeypoints3d(root, index) {
+async function loadKeypoints3d(root, index) {
     // 构建 URL，使用 index 参数来确定加载哪个文件
     const url = `../../dataset/${root}/keypoints3d/${index.toString().padStart(6, '0')}.json`; // 格式化文件名
 
     // 返回一个 Promise，以便可以使用 .then() 或 async/await 处理结果
-    return fetch(url)
-        .then(response => {
-            // 检查响应是否成功
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // 返回解析后的 JSON 数据
-            return data;
-        })
-        .catch(error => {
-            // 处理加载或解析中的任何错误
-            console.error('There has been a problem with your fetch operation:', error);
-        });
+    try {
+        const response = await fetch(url);
+        // 检查响应是否成功
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        // 处理加载或解析中的任何错误
+        console.error('There has been a problem with your fetch operation:', error);
+    }
 }
 
 async function loadAllKeypoints3d(root, N) {
