@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Three.js Skinning Example</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
+</head>
+<body>
+    <div class="container mt-3">
+        <div class="d-flex justify-content-center" id="vis3d">
+
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "../static/three/three.module.js",
+                "three/addons/": "../static/three/jsm/"
+            }
+        }
+    </script>
+    <script src="/static/dat.gui.min.js"></script>
+
+    <script type="module">
+
+        import * as THREE from 'three';
+    
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        import { create_scene } from '../scripts/create_scene.js';
+        import { load_smpl } from '../scripts/load_smpl.js';
+        let scene, camera, renderer;
+        let mesh, skeleton, bones;
+        let gui, controls;
+        var isInitialized = false;
+        init();
+
+        function init() {
+            const width = document.querySelector('.container').offsetWidth * 0.8;
+            const height = width;
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera( 60, width / height, 1, 1000 );
+            renderer = new THREE.WebGLRenderer( { antialias: true } );
+            controls = new OrbitControls( camera, renderer.domElement );
+            controls.minDistance = 1;
+            controls.maxDistance = 10;
+            // Scene, camera and renderer setup
+            create_scene(scene, camera);
+            renderer.setPixelRatio( window.devicePixelRatio );
+            renderer.setSize( width, height );
+            var container = document.getElementById('vis3d');
+            container.appendChild( renderer.domElement );
+
+            // Bones setup
+            load_smpl(scene).then(
+                result => {
+                    scene.add(result.mesh);
+                    console.log("skeleton");
+                    console.log(result.skeleton);
+                    bones = result.bones;
+                    skeleton = result.skeleton;
+                    const skeletonHelper = new THREE.SkeletonHelper(result.mesh);
+                    scene.add(skeletonHelper);
+                    isInitialized = true;
+                }
+            )
+            // scene.add(skeletonHelper);
+            // 创建四个骨骼
+            // const bone1 = new THREE.Bone();
+            // const bone2 = new THREE.Bone();
+            // const bone3 = new THREE.Bone();
+            // const bone4 = new THREE.Bone();
+
+            // // 设置骨骼的位置（根据需要调整）
+            // bone2.position.x = 1; // 假设bone2位于bone1上方5单位
+            // bone3.position.x = 1; // 假设bone3位于bone2上方5单位
+            // bone4.position.x = 1; // 假设bone4位于bone3上方5单位
+
+            // // 构建树状结构
+            // bone1.add(bone2); // bone2是bone1的子骨骼
+            // bone2.add(bone3); // bone3是bone2的子骨骼
+            // bone3.add(bone4); // bone4是bone3的子骨骼
+
+            // // 创建骨架
+            // bones = [bone1, bone2, bone3, bone4];
+            // skeleton = new THREE.Skeleton(bones);
+
+            // Custom Mesh setup
+            // const vertices = new Float32Array([
+            //     0, 0, 0,
+            //     1, 0, 0,
+            //     2, 0, 0,
+            //     3, 0, 0,
+            //     0, 1, 0,
+            //     1, 1, 0,
+            //     2, 1, 0,
+            //     3, 1, 0,
+            // ]);
+            // const indices = new Uint16Array([
+            //     0, 1, 4,
+            //     1, 2, 5,
+            //     2, 3, 6,
+            // ]);
+            // const skinIndices = new Float32Array([
+            //     0, 1, 0, 0, 
+            //     1, 0, 0, 0, 
+            //     2, 0, 0, 0,
+            //     3, 0, 0, 0,
+            //     0, 0, 0, 0,
+            //     1, 0, 0, 0,
+            //     2, 0, 0, 0,
+            //     3, 0, 0, 0
+            // ]);
+            // const skinWeights = new Float32Array([
+            //     1, 0, 0, 0, 
+            //     1, 0, 0, 0, 
+            //     1, 0, 0, 0,
+            //     1, 0, 0, 0,
+            //     1, 0, 0, 0,
+            //     1, 0, 0, 0,
+            //     1, 0, 0, 0,
+            //     1, 0, 0, 0
+            // ]);
+            
+            // Camera position
+            // GUI setup
+            gui = new dat.GUI();
+            controls = {
+                rotateBone0: 0,
+                rotateBone1: 0,
+                rotateBone2: 0,
+            };
+
+            gui.add(controls, 'rotateBone0', -Math.PI, Math.PI);
+            gui.add(controls, 'rotateBone1', -Math.PI, Math.PI);
+            gui.add(controls, 'rotateBone2', -Math.PI, Math.PI);
+            // gui.add(controls, 'rotateBone4', -Math.PI, Math.PI);
+        }
+        
+        animate();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Update bone rotations
+            bones[0].rotation.z += 0.01;
+            bones[3].rotation.z = controls.rotateBone1;
+            bones[5].rotation.z = controls.rotateBone2;
+            // bones[3].rotation.z = controls.rotateBone4;
+
+            // Update bone matrices
+            skeleton.update();
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
