@@ -2,11 +2,11 @@ import * as THREE from 'three';
 
 async function load_smpl(scene){
     const urls = [
-        '/assets/dump_smpl/v_template.bin',
-        '/assets/dump_smpl/faces.bin',
-        '/assets/dump_smpl/skinWeights.bin',
-        '/assets/dump_smpl/skinIndice.bin',
-        '/assets/dump_smpl/keypoints.bin',
+        '../../assets/dump_smpl/v_template.bin',
+        '../../assets/dump_smpl/faces.bin',
+        '../../assets/dump_smpl/skinWeights.bin',
+        '../../assets/dump_smpl/skinIndice.bin',
+        '../../assets/dump_smpl/keypoints.bin',
     ];
     const geometry = new THREE.BufferGeometry();
     const buffers = await Promise.all(urls.map(url => fetch(url).then(response => response.arrayBuffer())));
