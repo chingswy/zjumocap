@@ -42,17 +42,18 @@ function load_smpl(scene){
             geometry.setAttribute('position', new THREE.BufferAttribute(v_template, 3));
             geometry.setAttribute('skinIndex', new THREE.BufferAttribute(skinIndices, 4));
             geometry.setAttribute('skinWeight', new THREE.BufferAttribute(skinWeights, 4));
+            geometry.computeVertexNormals();
             console.log(geometry);
             // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, skinning: true, side: THREE.DoubleSide, });
-            const material = new THREE.MeshPhongMaterial({
-                color: 0x00ff00,
+            const material = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
                 skinning: true,
                 side: THREE.DoubleSide
             });
             
             var mesh = new THREE.SkinnedMesh(geometry, material);
-            
-            var mesh = new THREE.SkinnedMesh(geometry, material);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
             mesh.add(bones[0]);
             mesh.bind(skeleton);
             bones[0].rotation.x = Math.PI / 2;

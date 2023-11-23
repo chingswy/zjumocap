@@ -42,13 +42,15 @@
             const width = document.querySelector('.container').offsetWidth * 0.8;
             const height = width;
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera( 60, width / height, 1, 1000 );
+            camera = new THREE.PerspectiveCamera( 60, width / height, 0.01, 100 );
             renderer = new THREE.WebGLRenderer( { antialias: true } );
+
             controls = new OrbitControls( camera, renderer.domElement );
             controls.minDistance = 1;
             controls.maxDistance = 10;
             // Scene, camera and renderer setup
-            create_scene(scene, camera);
+            create_scene(scene, camera, renderer, true);
+
             renderer.setPixelRatio( window.devicePixelRatio );
             renderer.setSize( width, height );
             var container = document.getElementById('vis3d');
@@ -146,7 +148,7 @@
             requestAnimationFrame(animate);
 
             // Update bone rotations
-            bones[0].rotation.z += 0.01;
+            // bones[0].rotation.z += 0.01;
             bones[3].rotation.z = controls.rotateBone1;
             bones[5].rotation.z = controls.rotateBone2;
             // bones[3].rotation.z = controls.rotateBone4;

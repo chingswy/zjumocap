@@ -23,13 +23,14 @@ function getChessboard(grid_size=5, divisions = 10, white='#ffffff', black='#444
     var planeGeometry = new THREE.PlaneGeometry(grid_size, grid_size); // 根据需要调整尺寸
 
     // 创建材料
-    var planeMaterial = new THREE.MeshBasicMaterial({
+    var planeMaterial = new THREE.MeshStandardMaterial({
         map: texture,
         side: THREE.DoubleSide, // 渲染材料的两面
     });
 
     // 创建网格
     var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.receiveShadow = true;
     plane.rotation.x = -Math.PI; // 旋转以使平面水平
 
     return plane;
